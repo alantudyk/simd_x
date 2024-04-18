@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include "heap.h"
 
+#define _(CND) { \
+    if (CND) \
+        fprintf(stderr, "🤔, line: %d\n", __LINE__); \
+        return 1; \
+    }
+
 #define N (size_t)1e6
 
 int main(void) {
 
     minq_t q;
-    if (minq_init(&q, N)) {
-        fprintf(stderr, "%d\n", __LINE__);
-        return 1;
-    }
+    _(minq_init(&q, N))
 
     minq_release(&q);
 

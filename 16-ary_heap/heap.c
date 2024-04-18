@@ -9,14 +9,27 @@ bool minq_init(minq_t *const q, size_t c) {
         return true;
     q->_a += 15, q->_z = 0;
     __m256i s = _mm256_set1_epi32(q->_a[0] = INT32_MAX);
-    for (int *p = q->_a + 1, *const P = p + (q->_c - 1); p < P; p += 8)
+    for (int32_t *p = q->_a + 1, *const P = p + (q->_c - 1); p < P; p += 8)
         _mm256_storeu_si256((void *)p, s);
     return false;
 }
 
 void minq_release(minq_t *const q) { free(q->_a - 15), *q = (minq_t){}; }
 
-static bool sink(minq_t *const q, size_t i) {
+bool minq_push(minq_t *q, const int32_t x) {
+    size_t i = q->_z, p;
+    if (i == q->_c) return true;
+    int32_t *a = q->_a;
+    while (i > 0) {
+        p = (i - 1) / 16;
+        if (a[p] <= x) break;
+        p = i;
+    }
+    a[i] = x, q->_z++;
+    return false;
+}
+
+static void sink(minq_t *const q, size_t i) {
 
     const __m256i P2 = _mm256_set_epi32(6, 7, 4, 5, 2, 3, 0, 1),
                   P4 = _mm256_set_epi32(4, 4, 6, 6, 0, 0, 2, 2),
@@ -38,8 +51,6 @@ static bool sink(minq_t *const q, size_t i) {
 
     uint32_t lo = _mm256_movemask_epi8(_mm256_cmpeq_epi32(a, m));
     uint32_t hi = _mm256_movemask_epi8(_mm256_cmpeq_epi32(b, m));
-
     size_t ci = __builtin_ctzll(((uint64_t)hi << 32) | lo) / 4;
 
-    return false;
 }
