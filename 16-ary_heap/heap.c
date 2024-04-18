@@ -23,7 +23,7 @@ bool minq_push(minq_t *q, const int32_t x) {
     while (i > 0) {
         p = (i - 1) / 16;
         if (a[p] <= x) break;
-        a[i] = a[p], p = i;
+        a[i] = a[p], i = p;
     }
     a[i] = x, q->_z++;
     return false;
