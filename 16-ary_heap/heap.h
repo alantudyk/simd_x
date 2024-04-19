@@ -13,3 +13,6 @@ void minq_release(minq_t *q);
 
 __attribute__((warn_unused_result))
 bool minq_push(minq_t *q, int32_t x);
+
+__attribute__((warn_unused_result))
+bool minq_pop(minq_t *q, int32_t *_x);

@@ -38,7 +38,11 @@ int main(void) {
     clock_gettime(CLOCK_REALTIME, &___t1);
 
     _(minq_init(&q, N))
-    for (size_t i = 0; i < N; i++) { bool _ = minq_push(&q, R[i]); }
+    size_t i = 0;
+    while (i < N) { bool _ = minq_push(&q, R[i++]); }
+    int32_t x;
+    i = 0;
+    while (!minq_pop(&q, &x)) A[i++] = x;
 
     minq_release(&q);
 
