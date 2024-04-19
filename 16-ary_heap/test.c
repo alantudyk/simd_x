@@ -38,12 +38,12 @@ int main(void) {
     clock_gettime(CLOCK_REALTIME, &___t1);
 
     _(minq_init(&q, N))
-    for (size_t i = 0; i < N; i++) !minq_push(&q, R[i]);
+    for (size_t i = 0; i < N; i++) { bool _ = minq_push(&q, R[i]); }
+
+    minq_release(&q);
 
     clock_gettime(CLOCK_REALTIME, &___t2);
     printf("\n\tHeap-sort (w/o `heapify()`): %ld ms\n", TIME_DIFF_MS);
-
-    minq_release(&q);
 
     clock_gettime(CLOCK_REALTIME, &___t1);
     qsort(R, N, 4, cmp);
