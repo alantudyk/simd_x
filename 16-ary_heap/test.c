@@ -10,7 +10,7 @@
 #define TIME_DIFF_MCS  (TIME_DIFF_NS / (int64_t)1e3)
 
 #define _(CND) \
-    if (CND) { \
+    if (__builtin_expect(!!(CND), 0)) { \
         fprintf(stderr, "\n\t🤔, line: %d\n\n", __LINE__); \
         return 1; \
     }
@@ -25,6 +25,7 @@ static int32_t R[N], A[N];
 
 int main(void) {
 
+    // srand(time(NULL));
     for (size_t i = 0; i < N; i++) R[i] = rand();
 
     {
@@ -32,11 +33,11 @@ int main(void) {
     }
 
     minq_t q;
-    _(minq_init(&q, N))
 
     struct timespec ___t1, ___t2;
     clock_gettime(CLOCK_REALTIME, &___t1);
 
+    _(minq_init(&q, N))
     for (size_t i = 0; i < N; i++) !minq_push(&q, R[i]);
 
     clock_gettime(CLOCK_REALTIME, &___t2);
