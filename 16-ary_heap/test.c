@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <time.h>
 #include "heap.h"
@@ -10,9 +11,14 @@
 
 #define _(CND) \
     if (CND) { \
-        fprintf(stderr, "🤔, line: %d\n", __LINE__); \
+        fprintf(stderr, "\n\t🤔, line: %d\n\n", __LINE__); \
         return 1; \
     }
+
+static int cmp(const void *_a, const void *_b) {
+    const int32_t *a = _a, *b = _b;
+    return (*a > *b) - (*a < *b);
+}
 
 #define N (size_t)1e6
 static int32_t R[N], A[N];
@@ -37,6 +43,9 @@ int main(void) {
     printf("\n\t%ld ms\n\n", TIME_DIFF_MS);
 
     minq_release(&q);
+
+    qsort(R, N, 4, cmp);
+    _(memcmp(R, A, N * sizeof(int32_t)))
 
     return 0;
 }
