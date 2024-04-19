@@ -1,4 +1,5 @@
 #include <immintrin.h>
+#include <stdlib.h>
 #include "heap.h"
 
 bool minq_init(minq_t *const q, size_t c) {
