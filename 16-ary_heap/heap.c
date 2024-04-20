@@ -6,7 +6,7 @@ bool minq_init(minq_t *const q, size_t c) {
     if ((q->_c = c) == 0)
         return true;
     c = (c + 14) / 16 + 1;
-    if ((q->_a = aligned_alloc(32, c * 64)) == NULL)
+    if ((q->_a = aligned_alloc(64, c * 64)) == NULL)
         return true;
     q->_a += 15, q->_z = 0;
     const __m256i s = _mm256_set1_epi32(INT32_MAX);
