@@ -6,12 +6,12 @@ bool minq_init(minq_t *const q, size_t c) {
     if ((q->_c = c) == 0)
         return true;
     c = (c + 14) / 16 + 1;
-    if ((q->_a = malloc(c * 64)) == NULL)
+    if ((q->_a = aligned_alloc(32, c * 64)) == NULL)
         return true;
     q->_a += 15, q->_z = 0;
     const __m256i s = _mm256_set1_epi32(INT32_MAX);
     for (int32_t *p = q->_a + 1, *const P = p + (q->_c - 1); p < P; p += 8)
-        _mm256_storeu_si256((void *)p, s);
+        _mm256_store_si256((void *)p, s);
     return false;
 }
 
@@ -47,8 +47,8 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
 
     while ((c = i * 16 + 1) < z) {
 
-        const __m256i a = _mm256_loadu_si256((void *)(_a + c)),
-                      b = _mm256_loadu_si256((void *)(_a + c + 8));
+        const __m256i a = _mm256_load_si256((void *)(_a + c)),
+                      b = _mm256_load_si256((void *)(_a + c + 8));
 
         __m256i m = _mm256_min_epi32(a, b), p;
 
