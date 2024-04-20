@@ -25,23 +25,27 @@ static int32_t R[N], A[N];
 
 int main(void) {
 
+    size_t i = 0;
+
     // srand(time(NULL));
-    for (size_t i = 0; i < N; i++) R[i] = rand();
+
+    while (i < N) R[i++] = rand();
 
     {
         volatile int32_t ramp = 1e9; while (--ramp > 0);
     }
 
-    minq_t q;
-
     struct timespec ___t1, ___t2;
     clock_gettime(CLOCK_REALTIME, &___t1);
 
+    minq_t q;
     _(minq_init(&q, N))
-    size_t i = 0;
-    while (i < N) { bool _ = minq_push(&q, R[i++]); }
-    int32_t x;
+
     i = 0;
+    while (i < N) { bool _ = minq_push(&q, R[i++]); }
+
+    i = 0;
+    int32_t x;
     while (!minq_pop(&q, &x)) A[i++] = x;
 
     minq_release(&q);
