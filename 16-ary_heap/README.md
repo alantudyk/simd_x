@@ -3,7 +3,7 @@
 ```
 $ ./test.sh 
 
-	Heap-sort (w/o `heapify()`): 57 ms
+	Heap-sort (w/o `heapify()`): 51 ms
 
 	`qsort()`: 124 ms
 
@@ -12,7 +12,7 @@ $ ./test.sh
 ```
 $ ./test.sh 
 
-	Heap-sort (w/o `heapify()`): 1375 ms
+	Heap-sort (w/o `heapify()`): 1243 ms
 
 	`qsort()`: 1451 ms
 
@@ -21,7 +21,7 @@ $ ./test.sh
 ```
 $ ./test.sh 
 
-	Heap-sort (w/o `heapify()`): 25387 ms
+	Heap-sort (w/o `heapify()`): 22818 ms
 
 	`qsort()`: 16485 ms
 
