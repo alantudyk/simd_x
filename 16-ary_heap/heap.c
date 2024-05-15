@@ -10,8 +10,9 @@ bool minq_init(minq_t *const q, size_t c) {
         return true;
     q->_a += 15, q->_z = 0;
     const __m256i s = _mm256_set1_epi32(INT32_MAX);
-    for (int32_t *p = q->_a + 1, *const P = p + (q->_c - 1); p < P; p += 8)
-        _mm256_store_si256((void *)p, s);
+    for (int32_t *p = q->_a + 1, *const P = p + (q->_c - 1); p < P; p += 16)
+        _mm256_store_si256((void *)p, s),
+        _mm256_store_si256((void *)(p + 8), s);
     return false;
 }
 
@@ -50,18 +51,19 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
         const __m256i a = _mm256_load_si256((void *)(_a + c)),
                       b = _mm256_load_si256((void *)(_a + c + 8));
 
-        __m256i m = _mm256_min_epi32(a, b), p;
+        __m256i m = _mm256_min_epi32(a, b);
 
-        p = _mm256_permutevar8x32_epi32(m, P2), m = _mm256_min_epi32(m, p);
-        p = _mm256_permutevar8x32_epi32(m, P4), m = _mm256_min_epi32(m, p);
-        p = _mm256_permutevar8x32_epi32(m, P8), m = _mm256_min_epi32(m, p);
+        m = _mm256_min_epi32(m, _mm256_permutevar8x32_epi32(m, P2));
+        m = _mm256_min_epi32(m, _mm256_permutevar8x32_epi32(m, P4));
+        m = _mm256_min_epi32(m, _mm256_permutevar8x32_epi32(m, P8));
+
+        const int32_t v = _mm256_extract_epi32(m, 0);
+        if (sinking_key <= v) break;
 
         uint32_t lo = _mm256_movemask_epi8(_mm256_cmpeq_epi32(a, m));
         uint32_t hi = _mm256_movemask_epi8(_mm256_cmpeq_epi32(b, m));
         c += __builtin_ctzll(((uint64_t)hi << 32) | lo) / 4;
 
-        const int32_t v = _a[c];
-        if (sinking_key <= v) break;
         _a[i] = v, i = c;
     }
 
