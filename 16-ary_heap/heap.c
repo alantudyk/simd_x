@@ -42,8 +42,8 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
     _a[z] = INT32_MAX;
     size_t i = 0, c;
 
-    const __m256i P3 = _mm256_set_epi32(3, 3, 3, 3, 3, 3, 3, 3),
-                  P7 = _mm256_set_epi32(7, 7, 7, 7, 7, 7, 7, 7);
+    const __m256i P3 = _mm256_set1_epi32(3),
+                  P7 = _mm256_set1_epi32(7);
 
     while ((c = i * 16 + 1) < z) {
 
