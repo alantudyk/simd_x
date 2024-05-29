@@ -6,7 +6,7 @@ https://github.com/riscv/riscv-v-spec/issues/804
 ```
 $ ./test.sh 
 
-	Heap-sort (w/o `heapify()`): 51 ms
+	Heap-sort (w/o `heapify()`): 48 ms
 
 	`qsort()`: 124 ms
 
@@ -15,7 +15,7 @@ $ ./test.sh
 ```
 $ ./test.sh 
 
-	Heap-sort (w/o `heapify()`): 1243 ms
+	Heap-sort (w/o `heapify()`): 1203 ms
 
 	`qsort()`: 1451 ms
 
@@ -24,7 +24,7 @@ $ ./test.sh
 ```
 $ ./test.sh 
 
-	Heap-sort (w/o `heapify()`): 22818 ms
+	Heap-sort (w/o `heapify()`): 21012 ms
 
 	`qsort()`: 16485 ms
 

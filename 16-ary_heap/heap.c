@@ -42,9 +42,8 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
     _a[z] = INT32_MAX;
     size_t i = 0, c;
 
-    const __m256i P2 = _mm256_set_epi32(6, 7, 4, 5, 2, 3, 0, 1),
-                  P4 = _mm256_set_epi32(4, 4, 6, 6, 0, 0, 2, 2),
-                  P8 = _mm256_set_epi32(0, 0, 0, 0, 4, 4, 4, 4);
+    const __m256i P3 = _mm256_set_epi32(3, 3, 3, 3, 3, 3, 3, 3),
+                  P7 = _mm256_set_epi32(7, 7, 7, 7, 7, 7, 7, 7);
 
     while ((c = i * 16 + 1) < z) {
 
@@ -53,9 +52,12 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
 
         __m256i m = _mm256_min_epi32(a, b);
 
-        m = _mm256_min_epi32(m, _mm256_permutevar8x32_epi32(m, P2));
-        m = _mm256_min_epi32(m, _mm256_permutevar8x32_epi32(m, P4));
-        m = _mm256_min_epi32(m, _mm256_permutevar8x32_epi32(m, P8));
+        m = _mm256_min_epi32(m, _mm256_slli_si256(m, 4));
+        m = _mm256_min_epi32(m, _mm256_slli_si256(m, 8));
+        m = _mm256_min_epi32(
+            _mm256_permutevar8x32_epi32(m, P3),
+            _mm256_permutevar8x32_epi32(m, P7)
+        );
 
         const int32_t v = _mm256_extract_epi32(m, 0);
         if (sinking_key <= v) break;
