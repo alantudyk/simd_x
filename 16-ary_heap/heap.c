@@ -58,7 +58,7 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
             _mm256_permutevar8x32_epi32(m, P4)
         );
 
-        const int32_t v = _mm256_extract_epi32(m, 0);
+        const int32_t v = _mm256_cvtsi256_si32(m);
         if (sinking_key <= v) break;
 
         uint32_t lo = _mm256_movemask_epi8(_mm256_cmpeq_epi32(a, m));
