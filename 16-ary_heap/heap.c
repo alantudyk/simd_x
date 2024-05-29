@@ -51,8 +51,8 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
 
         __m256i m = _mm256_min_epi32(a, b);
 
-        m = _mm256_min_epi32(m, _mm256_srli_si256(m, 4));
-        m = _mm256_min_epi32(m, _mm256_srli_si256(m, 8));
+        m = _mm256_min_epi32(m, _mm256_bsrli_epi128(m, 4));
+        m = _mm256_min_epi32(m, _mm256_bsrli_epi128(m, 8));
         m = _mm256_min_epi32(
             _mm256_broadcastd_epi32(_mm256_castsi256_si128(m)),
             _mm256_permutevar8x32_epi32(m, P4)
