@@ -42,8 +42,6 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
     _a[z] = INT32_MAX;
     size_t i = 0, c;
 
-    const __m256i P4 = _mm256_set1_epi32(4);
-
     while ((c = i * 16 + 1) < z) {
 
         const __m256i a = _mm256_load_si256((void *)(_a + c)),
@@ -51,12 +49,12 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
 
         __m256i m = _mm256_min_epi32(a, b);
 
-        m = _mm256_min_epi32(m, _mm256_bsrli_epi128(m, 4));
-        m = _mm256_min_epi32(m, _mm256_bsrli_epi128(m, 8));
-        m = _mm256_min_epi32(
-            _mm256_broadcastd_epi32(_mm256_castsi256_si128(m)),
-            _mm256_permutevar8x32_epi32(m, P4)
-        );
+#define P(E3, E2, E1, E0) \
+    ((E3 << 6) | (E2 << 4) | (E1 << 2) | E0)
+
+        m = _mm256_min_epi32(m, _mm256_shuffle_epi32(m, P(2, 3, 0, 1)));
+        m = _mm256_min_epi32(m, _mm256_shuffle_epi32(m, P(0, 0, 2, 2)));
+        m = _mm256_min_epi32(m, _mm256_permute4x64_epi64(m, P(0, 0, 2, 2)));
 
         const int32_t v = _mm256_cvtsi256_si32(m);
         if (sinking_key <= v) break;
