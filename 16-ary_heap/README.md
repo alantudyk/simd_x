@@ -1,7 +1,7 @@
 ## \_minpos_
 https://github.com/riscv/riscv-v-spec/issues/804
 
-## Pseudorandom int32_t
+## Pseudorandom int32_t (gcc 11.4.0, i3-8109U)
 1e6:
 ```
 $ ./test.sh 
