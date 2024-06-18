@@ -73,7 +73,7 @@ static uint64_t number_of_divisors(uint64_t x) {
     for (int i = 0; i < 4; i++) r += ra[i];
 
     while (fd <= S)
-        r += (uint64_t)(x / (double)fd) * fd == x, fd += 2;
+        r += x % fd == 0, fd += 2;
 
     return dd * (r * 2 - (S * S == x));
 }
