@@ -21,7 +21,7 @@ static uint64_t number_of_divisors(uint64_t x) {
 
     _(x == 0)
 
-    uint64_t dd = __builtin_ctzll(x), r = 1, fd = 3, ra[4];
+    uint64_t dd = __builtin_ctzll(x), r = 1, fd = 7, ra[4];
     x >>= dd, ++dd;
 
     while (x % 3 == 0) x /= 3, ++r;
