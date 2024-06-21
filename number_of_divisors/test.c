@@ -34,39 +34,38 @@ static uint64_t number_of_divisors(uint64_t x) {
     const __m256d delta = _mm256_set1_pd(30.0);
 
     __m256d t = _mm256_set1_pd((double)x),
-           da = _mm256_set_pd( 7.0, 11.0, 13.0, 17.0),
-           db = _mm256_set_pd(19.0, 23.0, 29.0, 31.0), ea, eb;
-
-    __m256i ma, mb;
+           da = _mm256_setr_pd( 7.0, 11.0, 13.0, 17.0),
+           db = _mm256_setr_pd(19.0, 23.0, 29.0, 31.0);
 
     uint64_t S = sqrt(x), L = 31;
     const size_t offsets[] = {24, 20, 18, 14, 12, 8, 2, 0};
 
-    while (L <= S) {
+    for (; L <= S; L += 30) {
 
-        ea = _mm256_floor_pd(_mm256_div_pd(t, da)),
-        eb = _mm256_floor_pd(_mm256_div_pd(t, db));
+#define GET_MASK(a) \
+        const uint32_t m##a = _mm256_movemask_epi8( \
+            _mm256_cmpeq_epi64( \
+                _mm256_castpd_si256(t), \
+                _mm256_castpd_si256( \
+                    _mm256_mul_pd(_mm256_floor_pd(_mm256_div_pd(t, d##a)), d##a) \
+                ) \
+            ) \
+        ); \
+        d##a = _mm256_add_pd(d##a, delta);
 
-        ma = _mm256_cmpeq_epi64(
-            _mm256_castpd_si256(t),
-            _mm256_castpd_si256(_mm256_mul_pd(ea, da))
-        ),
-        mb = _mm256_cmpeq_epi64(
-            _mm256_castpd_si256(t),
-            _mm256_castpd_si256(_mm256_mul_pd(eb, db))
-        );
+        GET_MASK(a)
+        GET_MASK(b)
 
-        if (unlikely(_mm256_movemask_epi8(_mm256_or_si256(ma, mb)) != 0)) {
-            for (size_t i = 0; i < 8; i++) {
-                const uint64_t d = L - offsets[i];
+        if (unlikely((ma | mb) != 0)) {
+            uint64_t m = ((uint64_t)mb << 32) | ma, i = 0;
+            while (m > 0 & i < 8) {
+                const uint64_t tz = __builtin_ctzll(m),
+                                d = L - offsets[i += tz / 8];
                 while (x % d == 0) x /= d, ++c;
-                res *= c, c = 1;
+                res *= c, c = 1, ++i, m >>= tz + 8;
             }
             S = sqrt(x), t = _mm256_set1_pd((double)x);
         }
-
-        da = _mm256_add_pd(da, delta),
-        db = _mm256_add_pd(db, delta), L += 30;
     }
 
     for (L -= 24; L <= S; L += 2) {
