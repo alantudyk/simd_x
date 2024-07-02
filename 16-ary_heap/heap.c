@@ -11,8 +11,8 @@ bool minq_init(minq_t *const q, size_t c) {
     q->_a += 15, q->_z = 0;
     const __m256i s = _mm256_set1_epi32(INT32_MAX);
     for (int32_t *p = q->_a + 1, *const P = p + (q->_c - 1); p < P; p += 16)
-        _mm256_store_si256((void *)p, s),
-        _mm256_store_si256((void *)(p + 8), s);
+        _mm256_stream_si256((void *)p, s),
+        _mm256_stream_si256((void *)(p + 8), s);
     return false;
 }
 
@@ -59,11 +59,10 @@ bool minq_pop(minq_t *const q, int32_t *const _x) {
         const int32_t v = _mm256_cvtsi256_si32(m);
         if (sinking_key <= v) break;
 
-        uint32_t lo = _mm256_movemask_epi8(_mm256_cmpeq_epi32(a, m));
-        uint32_t hi = _mm256_movemask_epi8(_mm256_cmpeq_epi32(b, m));
-        c += __builtin_ctzll(((uint64_t)hi << 32) | lo) / 4;
+#define GET_MASK(a) \
+    _mm256_movemask_ps(_mm256_castsi256_ps(_mm256_cmpeq_epi32(a, m)))
 
-        _a[i] = v, i = c;
+        _a[i] = v, i = c + __builtin_ctz((GET_MASK(b) << 8) | GET_MASK(a));
     }
 
     _a[i] = sinking_key;
