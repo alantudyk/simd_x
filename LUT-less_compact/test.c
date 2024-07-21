@@ -15,9 +15,8 @@ static size_t select_lt(const int32_t *s,
     if (unlikely(_t == INT32_MIN)) return 0;
 
     int32_t *c = _c;
-    const __m256i seven = _mm256_set1_epi32(7),
-                      t = _mm256_set1_epi32(_t - 1),
-                    shr = _mm256_slli_epi32(
+    const __m256i t = _mm256_set1_epi32(_t - 1),
+                shr = _mm256_slli_epi32(
         _mm256_setr_epi32(0, 1, 2, 3, 4, 5, 6, 7), 2
     );
 
