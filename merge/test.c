@@ -13,23 +13,44 @@
 
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
-static void Scalar(const int32_t *l, const size_t lz,
-                   const int32_t *r, const size_t rz,
-                   int32_t *res) {
+static void Scalar(const int32_t *restrict l, const size_t lz,
+                   const int32_t *restrict r, const size_t rz,
+                   int32_t *restrict res) {
     const int32_t *const L = l + lz, *const R = r + rz;
 
+    while ((L - l >= 2) & (R - r >= 2)) {
+
+        register uint64_t lv = *(uint64_t *)l,
+                          rv = *(uint64_t *)r,
+                           v = (uint32_t)lv;
+
+        bool le = (int32_t)lv <= (int32_t)rv;
+        if (!le) v = (uint32_t)rv;  // `cmov`, please.
+        l += le;
+        r += le ^ 1;
+        lv >>= (le ? 32 : 0);
+        rv >>= (le ? 0 : 32);
+
+        le = (int32_t)lv <= (int32_t)rv;
+        v |= (uint64_t)(le ? (uint32_t)lv : (uint32_t)rv) << 32;
+        l += le;
+        r += le ^ 1;
+
+        *(uint64_t *)res = v, res += 2;
+    }
+
     while ((l < L) & (r < R)) {
-        const bool m = *l <= *r;
-        *res++ = m ? *l : *r, r += m ^ 1, l += m;
+        const bool le = *l <= *r;
+        *res++ = le ? *l : *r, l += le, r += le ^ 1;
     }
 
     memcpy(res, l, (const void *)L - (const void *)l);
     memcpy(res, r, (const void *)R - (const void *)r);
 }
 
-static void SIMD(const int32_t *lp, const size_t lz,
-                 const int32_t *rp, const size_t rz,
-                 int32_t *_res) {
+static void SIMD(const int32_t *restrict lp, const size_t lz,
+                 const int32_t *restrict rp, const size_t rz,
+                 int32_t *restrict _res) {
     const int32_t *const L = lp + lz, *const R = rp + rz;
 
     const __m256i shl = _mm256_set_epi32(6, 5, 4, 3, 2, 1, 0, 7),
