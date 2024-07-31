@@ -1,7 +1,7 @@
 ```
 $ ./test.sh
 
-	Scalar:       76 ms
+	Scalar:       75 ms
 	  SIMD:       86 ms
 
 ```

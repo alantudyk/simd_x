@@ -26,15 +26,12 @@ static void Scalar(const int32_t *restrict l, const size_t lz,
 
         bool le = (int32_t)lv <= (int32_t)rv;
         if (!le) v = (uint32_t)rv;  // `cmov`, please.
-        l += le;
-        r += le ^ 1;
-        lv >>= (le ? 32 : 0);
-        rv >>= (le ? 0 : 32);
+        l += le, r += le ^ 1;
+        lv >>= le << 5, rv >>= (le ^ 1) << 5;
 
         le = (int32_t)lv <= (int32_t)rv;
         v |= (uint64_t)(le ? (uint32_t)lv : (uint32_t)rv) << 32;
-        l += le;
-        r += le ^ 1;
+        l += le, r += le ^ 1;
 
         *(uint64_t *)res = v, res += 2;
     }
