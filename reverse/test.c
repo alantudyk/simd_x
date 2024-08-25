@@ -19,7 +19,21 @@ static void Scalar(int32_t *l, const size_t n) {
         t = *l, *l = *r, *r = t;
 }
 
-static void SIMD(int32_t *l, const size_t n) {
+static void SIMD_1(int32_t *l, const size_t n) {
+
+    const __m256i rev = _mm256_set_epi32(0, 1, 2, 3, 4, 5, 6, 7);
+
+    for (int32_t *r = (l + n) - 8; l + 8 <= r; l += 8, r -= 8) {
+        __m256i v1 = _mm256_load_si256((void *)l),
+                v2 = _mm256_load_si256((void *)r);
+        v1 = _mm256_permutevar8x32_epi32(v1, rev),
+        v2 = _mm256_permutevar8x32_epi32(v2, rev);
+        _mm256_store_si256((void *)l, v2),
+        _mm256_store_si256((void *)r, v1);
+    }
+}
+
+static void SIMD_3(int32_t *l, const size_t n) {
 
     const __m256i rev = _mm256_set_epi32(0, 1, 2, 3, 4, 5, 6, 7);
 
@@ -54,13 +68,13 @@ static void SIMD(int32_t *l, const size_t n) {
 #define N (size_t)96e6
 _Static_assert(N % 48 == 0, "");
 
-static _Alignas(64) int32_t A[N], B[N];
+static _Alignas(64) int32_t A[N], B[N], C[N];
 
 int main(void) {
 
     // srand(time(NULL));
 
-    for (size_t i = 0; i < N; i++) A[i] = B[i] = rand();
+    for (size_t i = 0; i < N; i++) A[i] = B[i] = C[i] = rand();
 
     {
         volatile int32_t ramp = 1e9; while (--ramp > 0);
@@ -73,17 +87,23 @@ int main(void) {
     const size_t ms = TIME_DIFF_MS;
 
     clock_gettime(CLOCK_REALTIME, &___t1);
-    SIMD(B, N);
+    SIMD_1(B, N);
     clock_gettime(CLOCK_REALTIME, &___t2);
-
+    const size_t ms_1 = TIME_DIFF_MS;
     _(memcmp(A, B, sizeof(A)))
+
+    clock_gettime(CLOCK_REALTIME, &___t1);
+    SIMD_3(C, N);
+    clock_gettime(CLOCK_REALTIME, &___t2);
+    _(memcmp(A, C, sizeof(A)))
 
     printf(
         "\n"
         "\tScalar: %8zu ms\n"
-        "\t  SIMD: %8zu ms\n"
+        "\tSIMD_1: %8zu ms\n"
+        "\tSIMD_3: %8zu ms\n"
         "\n"
-    , ms, (size_t)TIME_DIFF_MS);
+    , ms, ms_1, (size_t)TIME_DIFF_MS);
 
     return 0;
 }
