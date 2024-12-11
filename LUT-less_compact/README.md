@@ -11,3 +11,5 @@ const uint32_t mask = _mm256_movemask_epi8(v_reg),
      left_compacted = _pext_u32(0x76543210, mask),
     right_compacted = left_compacted << (32 - cnt);
 ```
+## Hoare_Sort: logarithmic depth for numerics
+https://codeforces.com/contest/1461/problem/D
