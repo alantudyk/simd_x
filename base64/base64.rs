@@ -2,38 +2,39 @@ const M: &[u8] =
     b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 fn main() {
+    type U = usize;
     fn scalar_encode(s: &[u8], t: &mut [u8]) {
-        fn f(b: u8) -> u8 { M[b as usize] }
         let n = s.len();
         let r = n % 3;
         let n = n - r;
         let mut si = 0;
         let mut ti = 0;
         while si < n {
-            let a = s[si + 0];
-            let b = s[si + 1];
-            let c = s[si + 2];
-            t[ti + 0] = f(a >> 2);
-            t[ti + 1] = f(((a &  3) << 4) | (b >> 4));
-            t[ti + 2] = f(((b & 15) << 2) | (c >> 6));
-            t[ti + 3] = f(c & 63);
+            let a =
+                ((s[si + 0] as U) << 16) |
+                ((s[si + 1] as U) <<  8) |
+                  s[si + 2] as U
+            ;
+            t[ti + 0] = M[a >> 18];
+            t[ti + 1] = M[(a >> 12) & 63];
+            t[ti + 2] = M[(a >>  6) & 63];
+            t[ti + 3] = M[a & 63];
             si += 3;
             ti += 4;
         }
         match r {
             1 => {
-                let a = s[si + 0];
-                t[ti + 0] = f(a >> 2);
-                t[ti + 1] = f((a & 3) << 4);
+                let a = s[si + 0] as U;
+                t[ti + 0] = M[a >> 2];
+                t[ti + 1] = M[(a & 3) << 4];
                 t[ti + 2] = b'=';
                 t[ti + 3] = b'=';
             },
             2 => {
-                let a = s[si + 0];
-                let b = s[si + 1];
-                t[ti + 0] = f(a >> 2);
-                t[ti + 1] = f(((a &  3) << 4) | (b >> 4));
-                t[ti + 2] = f((b & 15) << 2);
+                let a = ((s[si + 0] as U) << 8) | s[si + 1] as U;
+                t[ti + 0] = M[a >> 10];
+                t[ti + 1] = M[(a >> 4) & 63];
+                t[ti + 2] = M[(a & 15) << 2];
                 t[ti + 3] = b'=';
             },
             _ => (),
@@ -49,7 +50,6 @@ fn main() {
         // storeu
     }
 
-    type U = usize;
     const N: U = 1 << 20;
     const T: U = 1 << 13;
     let mut t = [0; (N + 2) / 3 * 4];
